@@ -1,5 +1,5 @@
 #include <math.h>
-#include "LedControl.h"
+#include <LedControl.h>
 #include "binary.h";
 
 const int x_out = A3; // analogue pins
@@ -25,50 +25,186 @@ int D_SOUTH = 5;
 int D_SW = 6;
 int D_WEST = 7;
 int D_NW = 8;
+int quadrant;
 
 /*
  Now we need a LedControl to work with.
- ***** These pin numbers will probably not work with your hardware *****
  pin 12 is connected to the DataIn 
  pin 11 is connected to the CLK 
  pin 10 is connected to LOAD 
- We have only a single MAX72XX.
- LedControl lc=LedControl(12,11,10,1);
  */
 LedControl lc=LedControl(12,11,10,2);
 
-/*
-byte frames[][8] = {
-   {
-  B00000000,
-  B00110000,
-  B00110000,
-  B00110000,
-  B00111000,
-  B00111000,
-  B00011000,
-  B00000000
+byte board[2][10] = {
+  {
+    B11111111,
+    B11111111,
+    B11111111,
+    B11100111,
+    B11100111,
+    B11111111,
+    B11111111,
+    B11111111
+  },{
+    B00000000,
+    B00000000,
+    B00000000,
+    B00011000,
+    B00011000,
+    B00000000,
+    B00000000,
+    B00000000
+  }
+};
+
+int bitReadWrapper(byte row, int col){
+  if(col > 7 || col < 0)
+    return 1;
+  return bitRead(row, 7-col);
 }
-*/
+
+void bitClearWrapper(byte row, int col){
+  if(col >= 0 && col <= 7)
+    bitClear(row, 7-col);
+}
+
+void bitSetWrapper(byte row, int col){
+  if(col >= 0 && col <= 7)
+    bitSet(row, 7-col);
+}
+
+void process_boards(){
+  for (int b=0; b < 2; b++){
+    for (int row=0; row < 8; row++){ // we skip the first and last rows
+      for (int col=0; col < 8; col++){ // and cols
+        Serial.print(b);
+        Serial.print(", ");
+        Serial.print(row);
+        Serial.print(", ");
+        Serial.print(col);
+        Serial.print("\n");
+        //lc.setLed(h, i, j, true);
+        // read the bit
+        if(bitReadWrapper(board[b][row], col) == 1){
+          // it's set. look for a move in the direction of "quadrant"
+
+
+          
+          if (quadrant == D_NORTH){
+            if(bitReadWrapper(board[b][row+1], col+1) == 0){
+              // check to see if this should pass the particle to the lower board
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row+1], col+1);
+            }else if(bitReadWrapper(board[b][row+1], col) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row+1], col);
+            }else if(bitReadWrapper(board[b][row], col+1) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row], col+1);
+            }
+          }else if (quadrant == D_NE){
+            if(bitReadWrapper(board[b][row+1], col) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row+1], col);
+            }
+          }else if (quadrant == D_EAST){
+            if(bitReadWrapper(board[b][row+1], col-1) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row+1], col-1);
+            }else if(bitReadWrapper(board[b][row], col-1) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row], col-1);
+            }else if(bitReadWrapper(board[b][row+1], col) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row+1], col);
+            }
+          }else if (quadrant == D_SE){
+            if(bitReadWrapper(board[b][row], col-1) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row], col-1);
+            }
+          }else if (quadrant == D_SOUTH){
+            // check to see if this should pass the particle to the lower board          
+            if(bitReadWrapper(board[b][row-1], col-1) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row-1], col-1);
+            }else if(bitReadWrapper(board[b][row-1], col) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row-1], col);
+            }else if(bitReadWrapper(board[b][row], col-1) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row], col-1);
+            }
+          }else if (quadrant == D_SW){
+            if(bitReadWrapper(board[b][row-1], col) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row-1], col);
+            }
+          }else if (quadrant == D_WEST){
+            if(bitReadWrapper(board[b][row-1], col+1) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row-1], col+1);
+            }else if(bitReadWrapper(board[b][row], col+1) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row], col+1);
+            }else if(bitReadWrapper(board[b][row-1], col) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row-1], col);
+            }
+          }else if (quadrant == D_NW){
+            if(bitReadWrapper(board[b][row], col+1) == 0){
+              bitClearWrapper(board[b][row], col); // where I am now
+              bitSetWrapper(board[b][row], col+1);
+            }
+          }
+
+
+          
+        }// end bitRead
+      }// end col
+    }// end row
+  }// end b (board)
+}
 
 
 void setup() {
-  /* The MAX72XX is in power-saving mode on startup,
-   we have to do a wakeup call */
-   
-  lc.shutdown(0,false);
-  /* Set the brightness to a medium values */
-  lc.setIntensity(0,10);
-  /* and clear the display */
-  lc.clearDisplay(0);
-  
+  /* Wakeup The MAX72XX */
+  for(int index=0;index<lc.getDeviceCount();index++) {
+    lc.shutdown(index,false); 
+    lc.setIntensity(0,8);
+    lc.clearDisplay(0);
+  } 
+
   Serial.begin(9600); 
+  //test_leds();
+
 }
 
+void test_leds(){
+  for (int h=0; h < 2; h++){
+    for (int i=0; i < 8; i++){
+      for (int j=0; j < 8; j++){
+        lc.setLed(h, i, j, true);
+        delay(10);
+        lc.setLed(h, i, j, false);
+      }
+    }
+  }
+}
+
+
+void update_boards(){
+  for (int b=0; b < 2; b++){
+    for (int row=0; row < 8; row++){
+        lc.setRow(b, row, board[b][row]);
+    }
+  }
+}
+
+
 void loop() {
-  // put your main code here, to run repeatedly:
+   // put your main code here, to run repeatedly:
   int x_adc_value, y_adc_value, z_adc_value, theta, x, y;
-  int quadrant;
   int x_range_mid = (x_range_high + x_range_low) / 2;
   int y_range_mid = (y_range_high + y_range_low) / 2;
 
@@ -77,6 +213,7 @@ void loop() {
 
   y = analogRead(y_out);
   y_adc_value = y - y_range_mid;
+  
   /*
   if(x > max_x) max_x = x;
   if(x < min_x) min_x = x;
@@ -104,20 +241,10 @@ void loop() {
   else
     quadrant = D_NW;
 
+  process_boards();
 
-    
-  /*
-  Serial.print("x = ");
-  Serial.print(x_adc_value);
-  Serial.print("\t\t");
-  // Serial.print(max_x);
-  // Serial.print("\t\t");
-  Serial.print("y = ");
-  Serial.print(y_adc_value);
-  Serial.print("\t\t");
-  // Serial.print(max_y);
-  // Serial.print("\t\t");
-  */
+  update_boards();
+
   Serial.print("theta = ");
   Serial.print(theta);
   Serial.print("\t\t");
