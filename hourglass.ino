@@ -63,14 +63,14 @@ int bitReadWrapper(byte row, int col){
   return bitRead(row, 7-col);
 }
 
-void bitClearWrapper(byte row, int col){
+void bitClearWrapper(byte *row, int col){
   if(col >= 0 && col <= 7)
-    bitClear(row, 7-col);
+    bitClear(*row, 7-col);
 }
 
-void bitSetWrapper(byte row, int col){
+void bitSetWrapper(byte *row, int col){
   if(col >= 0 && col <= 7)
-    bitSet(row, 7-col);
+    bitSet(*row, 7-col);
 }
 
 void process_boards(){
@@ -93,68 +93,68 @@ void process_boards(){
           if (quadrant == D_NORTH){
             if(bitReadWrapper(board[b][row+1], col+1) == 0){
               // check to see if this should pass the particle to the lower board
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row+1], col+1);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row+1], col+1);
             }else if(bitReadWrapper(board[b][row+1], col) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row+1], col);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row+1], col);
             }else if(bitReadWrapper(board[b][row], col+1) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row], col+1);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row], col+1);
             }
           }else if (quadrant == D_NE){
             if(bitReadWrapper(board[b][row+1], col) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row+1], col);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row+1], col);
             }
           }else if (quadrant == D_EAST){
             if(bitReadWrapper(board[b][row+1], col-1) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row+1], col-1);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row+1], col-1);
             }else if(bitReadWrapper(board[b][row], col-1) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row], col-1);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row], col-1);
             }else if(bitReadWrapper(board[b][row+1], col) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row+1], col);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row+1], col);
             }
           }else if (quadrant == D_SE){
             if(bitReadWrapper(board[b][row], col-1) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row], col-1);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row], col-1);
             }
           }else if (quadrant == D_SOUTH){
             // check to see if this should pass the particle to the lower board          
             if(bitReadWrapper(board[b][row-1], col-1) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row-1], col-1);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row-1], col-1);
             }else if(bitReadWrapper(board[b][row-1], col) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row-1], col);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row-1], col);
             }else if(bitReadWrapper(board[b][row], col-1) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row], col-1);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row], col-1);
             }
           }else if (quadrant == D_SW){
             if(bitReadWrapper(board[b][row-1], col) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row-1], col);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row-1], col);
             }
           }else if (quadrant == D_WEST){
             if(bitReadWrapper(board[b][row-1], col+1) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row-1], col+1);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row-1], col+1);
             }else if(bitReadWrapper(board[b][row], col+1) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row], col+1);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row], col+1);
             }else if(bitReadWrapper(board[b][row-1], col) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row-1], col);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row-1], col);
             }
           }else if (quadrant == D_NW){
             if(bitReadWrapper(board[b][row], col+1) == 0){
-              bitClearWrapper(board[b][row], col); // where I am now
-              bitSetWrapper(board[b][row], col+1);
+              bitClearWrapper(&board[b][row], col); // where I am now
+              bitSetWrapper(&board[b][row], col+1);
             }
           }
 
