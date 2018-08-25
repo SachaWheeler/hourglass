@@ -50,8 +50,8 @@ byte board[2][8] = {
     B00000000,
     B00000000,
     B00000000,
-    B00011000,
-    B00011000,
+    B00000000,
+    B00000000,
     B00000000,
     B00000000,
     B00000000
@@ -76,15 +76,8 @@ void bit_set(int b, int row, int col){
 
 void process_boards(){
   for (int b=0; b < number_devices; b++){
-    for (int row=0; row < 8; row++){ // we skip the first and last rows
-      for (int col=0; col < 8; col++){ // and cols
-        Serial.print(b);
-        Serial.print(", ");
-        Serial.print(row);
-        Serial.print(", ");
-        Serial.print(col);
-        Serial.print("\n");
-        //lc.setLed(h, i, j, true);
+    for (int row=0; row < 8; row++){
+      for (int col=0; col < 8; col++){
         // read the bit
         if(bit_read(b, row, col) == 1){
           // it's set. look for a move in the direction of "quadrant"
@@ -92,8 +85,12 @@ void process_boards(){
 
           
           if (quadrant == D_NORTH){
-            if(bit_read(b, row+1, col+1) == 0){
-              // check to see if this should pass the particle to the lower board
+            // check to see if this should pass the particle to the lower board
+            if(b==0 && row==7 && col==7){
+                Serial.print("passing south\n");
+                bit_clear(b, row, col);
+                bit_set(1, 0, 0);
+            }else if(bit_read(b, row+1, col+1) == 0){
               bit_clear(b, row, col);
               bit_set(b, row+1, col+1);
             }else if(bit_read(b, row+1, col) == 0){
@@ -125,8 +122,11 @@ void process_boards(){
               bit_set(b, row, col-1);
             }
           }else if (quadrant == D_SOUTH){
-            // check to see if this should pass the particle to the lower board          
-            if(bit_read(b, row-1, col-1) == 0){
+            // check to see if this should pass the particle to the upper board   
+            if(b==1 && row==0 && col==0){
+              bit_clear(b, row, col);
+              bit_set(0, 7, 7);
+            }else if(bit_read(b, row-1, col-1) == 0){
               bit_clear(b, row, col);
               bit_set(b, row-1, col-1);
             }else if(bit_read(b, row-1, col) == 0){
@@ -177,11 +177,12 @@ void setup() {
   } 
 
   Serial.begin(9600); 
-  //test_leds();
-
+  
+  test_leds();
 }
 
 void test_leds(){
+  Serial.print("start test\n");
   for (int h=0; h < number_devices; h++){
     for (int i=0; i < 8; i++){
       for (int j=0; j < 8; j++){
@@ -191,6 +192,7 @@ void test_leds(){
       }
     }
   }
+  Serial.print("end test\n");
 }
 
 
@@ -241,7 +243,7 @@ void loop() {
   Serial.print(quadrant);
   Serial.print("\n");
  
-  delay(500);
+  delay(10);
 }
 
 /*
