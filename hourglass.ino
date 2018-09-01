@@ -68,130 +68,6 @@ byte board[2][8] = {
   }
 };
 
-int bit_read(int b, int row, int col){
-  if(col > 7 || col < 0 || row > 7 || row < 0)
-    return 1;
-  return bitRead(board[b][row], 7-col);
-}
-
-void bit_swap(int from_b, int from_row, int from_col, int b, int row, int col){
-  if(from_col >= 0 && from_col <= 7 && from_row >= 0 && from_row <= 7)
-    bitClear(board[from_b][from_row], 7-from_col);
-  if(col >= 0 && col <= 7 && row >= 0 && row <= 7)
-    bitSet(board[b][row], 7-col);
-    update_boards();
-}
-
-void process_boards(){
-  for (int b=0; b < number_devices; b++){
-    for (int row=0; row < 8; row++){
-      for (int col=0; col < 8; col++){
-        // read the bit
-        if(bit_read(b, row, col) == 1){
-          // it's set. look for a move in the direction of "quadrant"
-
-
-          
-          if (quadrant == D_NORTH){
-            // check to see if this should pass the particle to the lower board
-            if(b==0 && row==7 && col==7 && bit_read(1, 0, 0) == 0){
-              if(currentMillis - previousMillis > interval) {
-                  previousMillis = currentMillis;   
-
-                  bit_swap(b, row, col, 1, 0, 0);
-              }
-            }else if(bit_read(b, row+1, col+1) == 0){              
-              bit_swap(b, row, col, b, row+1, col+1);
-            }else if(bit_read(b, row+1, col) == 0){
-              bit_swap(b, row, col, b, row+1, col);
-            }else if(bit_read(b, row, col+1) == 0){
-              bit_swap(b, row, col, b, row, col+1);
-            }
-          }else if (quadrant == D_NE){
-            if(bit_read(b, row+1, col) == 0){
-              bit_swap(b, row, col, b, row+1, col);
-            } // add random slide left or right, if available
-            else if (random(1,random_scale) == random_score){
-              if(bit_read(b, row+1, col-1) == 0){
-                bit_swap(b, row, col, b, row+1, col-1);
-              }else if (bit_read(b, row+1, col+1) == 0){
-                bit_swap(b, row, col, b, row+1, col+1);
-              }
-            }
-          }else if (quadrant == D_EAST){
-            if(bit_read(b, row+1, col-1) == 0){
-              bit_swap(b, row, col, b, row+1, col-1);
-            }else if(bit_read(b, row, col-1) == 0){
-              bit_swap(b, row, col, b, row, col-1);
-            }else if(bit_read(b, row+1, col) == 0){
-              bit_swap(b, row, col, b, row+1, col);
-            }
-          }else if (quadrant == D_SE){
-            if(bit_read(b, row, col-1) == 0){
-              bit_swap(b, row, col, b, row, col-1);
-            } // add random slide left or right, if available
-            else if (random(1,random_scale) == random_score){
-              if(bit_read(b, row-1, col-1) == 0){
-                bit_swap(b, row, col, b, row-1, col-1);
-              }else if (bit_read(b, row+1, col-1) == 0){
-                bit_swap(b, row, col, b, row+1, col-1);
-              }
-            }
-          }else if (quadrant == D_SOUTH){
-            // check to see if this should pass the particle to the upper board   
-            if(b==1 && row==0 && col==0 && bit_read(0, 7, 7) == 0){
-               if(currentMillis - previousMillis > interval) {
-                  previousMillis = currentMillis;   
-                  
-                  bit_swap(b, row, col, 0, 7, 7);
-               }
-            }else if(bit_read(b, row-1, col-1) == 0){
-              bit_swap(b, row, col, b, row-1, col-1);
-            }else if(bit_read(b, row-1, col) == 0){
-              bit_swap(b, row, col, b, row-1, col);
-            }else if(bit_read(b, row, col-1) == 0){
-              bit_swap(b, row, col, b, row, col-1);
-            }
-          }else if (quadrant == D_SW){
-            if(bit_read(b, row-1, col) == 0){
-              bit_swap(b, row, col, b, row-1, col);
-            } // add random slide left or right, if available
-            else if (random(1, random_scale) == random_score){
-              if(bit_read(b, row-1, col+1) == 0){
-                bit_swap(b, row, col, b, row-1, col+1);
-              }else if (bit_read(b, row-1, col-1) == 0){
-                bit_swap(b, row, col, b, row-1, col-1);
-              }
-            }
-          }else if (quadrant == D_WEST){
-            if(bit_read(b, row-1, col+1) == 0){
-              bit_swap(b, row, col, b, row-1, col+1);
-            }else if(bit_read(b, row, col+1) == 0){
-              bit_swap(b, row, col, b, row, col+1);
-            }else if(bit_read(b, row-1, col) == 0){
-              bit_swap(b, row, col, b, row-1, col);
-            }
-          }else if (quadrant == D_NW){
-            if(bit_read(b, row, col+1) == 0){
-              bit_swap(b, row, col, b, row, col+1);
-            } // add random slide left or right, if available
-            else if (random(1,random_scale) == random_score){
-              if(bit_read(b, row+1, col+1) == 0){
-                bit_swap(b, row, col, b, row+1, col+1);
-              }else if (bit_read(b, row-1, col+1) == 0){
-                bit_swap(b, row, col, b, row-1, col+1);
-              }
-            }
-          }
-
-
-          
-        }// end bitRead
-      }// end col
-    }// end row
-  }// end b (board)
-}
-
 
 void setup() {
   /* Wakeup The MAX72XXs */
@@ -220,13 +96,152 @@ void test_leds(){
   Serial.print("end test\n");
 }
 
+int bit_read(int b, int row, int col){
+  if(col > 7 || col < 0 || row > 7 || row < 0)
+    return 1;
+  return bitRead(board[b][row], 7-col);
+}
 
-void update_boards(){
+void bit_swap(int from_b, int from_row, int from_col, int b, int row, int col){
+  if(from_col >= 0 && from_col <= 7 && from_row >= 0 && from_row <= 7)
+    bitClear(board[from_b][from_row], 7-from_col);
+  if(col >= 0 && col <= 7 && row >= 0 && row <= 7)
+    bitSet(board[b][row], 7-col);
+    update_boards(b, row);
+}
+
+void update_boards(int b, int row){
+  if (b==1 && row==0)
+    lc.setRow(0, 7, board[0][7]);
+  if (row > 0)
+    lc.setRow(b, row-1, board[b][row-1]);
+  lc.setRow(b, row, board[b][row]);
+  if (row < 7)
+    lc.setRow(b, row+1, board[b][row+1]);
+  if (b==0 && row == 7)
+    lc.setRow(1, 0, board[1][0]);
+
+  /*
   for (int b=0; b < number_devices; b++){
     for (int row=0; row < 8; row++){
-        lc.setRow(b, row, board[b][row]);
-    }
-  }
+        lc.setRow(b, row, board[b][row]);}} */
+}
+
+void process_boards(){
+  for (int b=0; b < number_devices; b++){
+    for (int row=0; row < 8; row++){
+      for (int col=0; col < 8; col++){
+        // read the bit
+        if(bit_read(b, row, col) == 1){
+          // a partile is present. look for a move in the direction of "quadrant"
+
+
+          
+          if (quadrant == D_NORTH){
+            // check to see if this should pass the particle to the lower board
+            if(b==0 && row==7 && col==7 && bit_read(1, 0, 0) == 0){
+              if(currentMillis - previousMillis > interval) {
+                  previousMillis = currentMillis;   
+
+                  bit_swap(b, row, col, 1, 0, 0);
+              }
+            }else if(bit_read(b, row+1, col+1) == 0){              
+              bit_swap(b, row, col, b, row+1, col+1);
+            }else if(bit_read(b, row+1, col) == 0){
+              bit_swap(b, row, col, b, row+1, col);
+            }else if(bit_read(b, row, col+1) == 0){
+              bit_swap(b, row, col, b, row, col+1);
+            }
+            
+          }else if (quadrant == D_NE){
+            if(bit_read(b, row+1, col) == 0){
+              bit_swap(b, row, col, b, row+1, col);
+            } // add random slide left or right, if available
+            else if (random(1,random_scale) == random_score){
+              if(bit_read(b, row+1, col-1) == 0){
+                bit_swap(b, row, col, b, row+1, col-1);
+              }else if (bit_read(b, row+1, col+1) == 0){
+                bit_swap(b, row, col, b, row+1, col+1);
+              }
+            }
+            
+          }else if (quadrant == D_EAST){
+            if(bit_read(b, row+1, col-1) == 0){
+              bit_swap(b, row, col, b, row+1, col-1);
+            }else if(bit_read(b, row, col-1) == 0){
+              bit_swap(b, row, col, b, row, col-1);
+            }else if(bit_read(b, row+1, col) == 0){
+              bit_swap(b, row, col, b, row+1, col);
+            }
+            
+          }else if (quadrant == D_SE){
+            if(bit_read(b, row, col-1) == 0){
+              bit_swap(b, row, col, b, row, col-1);
+            } // add random slide left or right, if available
+            else if (random(1,random_scale) == random_score){
+              if(bit_read(b, row-1, col-1) == 0){
+                bit_swap(b, row, col, b, row-1, col-1);
+              }else if (bit_read(b, row+1, col-1) == 0){
+                bit_swap(b, row, col, b, row+1, col-1);
+              }
+            }
+            
+          }else if (quadrant == D_SOUTH){
+            // check to see if this should pass the particle to the upper board   
+            if(b==1 && row==0 && col==0 && bit_read(0, 7, 7) == 0){
+               if(currentMillis - previousMillis > interval) {
+                  previousMillis = currentMillis;   
+                  
+                  bit_swap(b, row, col, 0, 7, 7);
+               }
+            }else if(bit_read(b, row-1, col-1) == 0){
+              bit_swap(b, row, col, b, row-1, col-1);
+            }else if(bit_read(b, row-1, col) == 0){
+              bit_swap(b, row, col, b, row-1, col);
+            }else if(bit_read(b, row, col-1) == 0){
+              bit_swap(b, row, col, b, row, col-1);
+            }
+            
+          }else if (quadrant == D_SW){
+            if(bit_read(b, row-1, col) == 0){
+              bit_swap(b, row, col, b, row-1, col);
+            } // add random slide left or right, if available
+            else if (random(1, random_scale) == random_score){
+              if(bit_read(b, row-1, col+1) == 0){
+                bit_swap(b, row, col, b, row-1, col+1);
+              }else if (bit_read(b, row-1, col-1) == 0){
+                bit_swap(b, row, col, b, row-1, col-1);
+              }
+            }
+            
+          }else if (quadrant == D_WEST){
+            if(bit_read(b, row-1, col+1) == 0){
+              bit_swap(b, row, col, b, row-1, col+1);
+            }else if(bit_read(b, row, col+1) == 0){
+              bit_swap(b, row, col, b, row, col+1);
+            }else if(bit_read(b, row-1, col) == 0){
+              bit_swap(b, row, col, b, row-1, col);
+            }
+            
+          }else if (quadrant == D_NW){
+            if(bit_read(b, row, col+1) == 0){
+              bit_swap(b, row, col, b, row, col+1);
+            } // add random slide left or right, if available
+            else if (random(1,random_scale) == random_score){
+              if(bit_read(b, row+1, col+1) == 0){
+                bit_swap(b, row, col, b, row+1, col+1);
+              }else if (bit_read(b, row-1, col+1) == 0){
+                bit_swap(b, row, col, b, row-1, col+1);
+              }
+            }
+          }
+
+
+          
+        }// end bitRead
+      }// end col
+    }// end row
+  }// end b (board)
 }
 
 
@@ -258,5 +273,6 @@ void loop() {
   else                              quadrant = D_NW;
 
   process_boards();
+  delay(10);
 }
 
