@@ -35,7 +35,7 @@ long previousMillis = 0;
 unsigned long currentMillis;
 
 const int random_scale = 5;
-int random_score = 1;
+int random_score = 2;
 
 /*
  Now we need a LedControl to work with.
@@ -103,29 +103,17 @@ int bit_read(int b, int row, int col){
 }
 
 void bit_swap(int from_b, int from_row, int from_col, int b, int row, int col){
-  if(from_col >= 0 && from_col <= 7 && from_row >= 0 && from_row <= 7)
+  if (from_col >= 0 && from_col <= 7 && from_row >= 0 && from_row <= 7){
     bitClear(board[from_b][from_row], 7-from_col);
-  if(col >= 0 && col <= 7 && row >= 0 && row <= 7)
+    if (from_b != b || from_row != row)  // draw it if we need to
+      lc.setRow(from_b, from_row, board[from_b][from_row]);
+  }
+  if (col >= 0 && col <= 7 && row >= 0 && row <= 7){
     bitSet(board[b][row], 7-col);
-    update_boards(b, row);
+    lc.setRow(b, row, board[b][row]);
+  }
 }
 
-void update_boards(int b, int row){
-  if (b==1 && row==0)
-    lc.setRow(0, 7, board[0][7]);
-  if (row > 0)
-    lc.setRow(b, row-1, board[b][row-1]);
-  lc.setRow(b, row, board[b][row]);
-  if (row < 7)
-    lc.setRow(b, row+1, board[b][row+1]);
-  if (b==0 && row == 7)
-    lc.setRow(1, 0, board[1][0]);
-
-  /*
-  for (int b=0; b < number_devices; b++){
-    for (int row=0; row < 8; row++){
-        lc.setRow(b, row, board[b][row]);}} */
-}
 
 void process_boards(){
   for (int b=0; b < number_devices; b++){
@@ -247,18 +235,13 @@ void process_boards(){
 
 void loop() {
    // put your main code here, to run repeatedly:
-  int x_adc_value, y_adc_value, z_adc_value, theta, x, y;
+  int x_adc_value, y_adc_value, z_adc_value, theta;
 
   currentMillis = millis();
 
-  x = analogRead(x_out);
-  x_adc_value = x - x_range_mid;
-
-  y = analogRead(y_out);
-  y_adc_value = y - y_range_mid;
-  
-  /* if(x > max_x) max_x = x; if(x < min_x) min_x = x;
-     if(y > max_y) max_y = y; if(y < min_y) min_y = y; */
+  x_adc_value = analogRead(x_out) - x_range_mid;
+  y_adc_value = analogRead(y_out) - y_range_mid;
+  // z_adc_value = analogRead(z_out) - z_range_mid;
   
   theta = round( atan2 (y_adc_value, x_adc_value) * 180/3.14159265 );
   if(theta < 1) theta += 360;
@@ -273,6 +256,7 @@ void loop() {
   else                              quadrant = D_NW;
 
   process_boards();
-  delay(10);
+  
+  delay(20);
 }
 
