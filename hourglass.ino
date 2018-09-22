@@ -96,6 +96,10 @@ void test_leds(){
   Serial.print("end test\n");
 }
 
+boolean is_empty(int b, int row, int col){
+  return bit_read(b, row, col) == 0;
+}
+
 int bit_read(int b, int row, int col){
   if(col > 7 || col < 0 || row > 7 || row < 0)
     return 1;
@@ -121,104 +125,104 @@ void process_boards(){
       for (int col=0; col < 8; col++){
         // read the bit
         if(bit_read(b, row, col) == 1){
-          // a partile is present. look for a move in the direction of "quadrant"
+          // a partile is present. look for an open space in the direction of "quadrant"
 
 
           
           if (quadrant == D_NORTH){
             // check to see if this should pass the particle to the lower board
-            if(b==0 && row==7 && col==7 && bit_read(1, 0, 0) == 0){
+            if(b==0 && row==7 && col==7 && is_empty(1, 0, 0)){
               if(currentMillis - previousMillis > interval) {
                   previousMillis = currentMillis;   
 
                   bit_swap(b, row, col, 1, 0, 0);
               }
-            }else if(bit_read(b, row+1, col+1) == 0){              
+            }else if(is_empty(b, row+1, col+1)){              
               bit_swap(b, row, col, b, row+1, col+1);
-            }else if(bit_read(b, row+1, col) == 0){
+            }else if(is_empty(b, row+1, col)){
               bit_swap(b, row, col, b, row+1, col);
-            }else if(bit_read(b, row, col+1) == 0){
+            }else if(is_empty(b, row, col+1)){
               bit_swap(b, row, col, b, row, col+1);
             }
             
           }else if (quadrant == D_NE){
-            if(bit_read(b, row+1, col) == 0){
+            if(is_empty(b, row+1, col)){
               bit_swap(b, row, col, b, row+1, col);
             } // add random slide left or right, if available
             else if (random(1,random_scale) == random_score){
-              if(bit_read(b, row+1, col-1) == 0){
+              if(is_empty(b, row+1, col-1)){
                 bit_swap(b, row, col, b, row+1, col-1);
-              }else if (bit_read(b, row+1, col+1) == 0){
+              }else if (is_empty(b, row+1, col+1)){
                 bit_swap(b, row, col, b, row+1, col+1);
               }
             }
             
           }else if (quadrant == D_EAST){
-            if(bit_read(b, row+1, col-1) == 0){
+            if(is_empty(b, row+1, col-1)){
               bit_swap(b, row, col, b, row+1, col-1);
-            }else if(bit_read(b, row, col-1) == 0){
+            }else if(is_empty(b, row, col-1)){
               bit_swap(b, row, col, b, row, col-1);
-            }else if(bit_read(b, row+1, col) == 0){
+            }else if(is_empty(b, row+1, col)){
               bit_swap(b, row, col, b, row+1, col);
             }
             
           }else if (quadrant == D_SE){
-            if(bit_read(b, row, col-1) == 0){
+            if(is_empty(b, row, col-1)){
               bit_swap(b, row, col, b, row, col-1);
             } // add random slide left or right, if available
             else if (random(1,random_scale) == random_score){
-              if(bit_read(b, row-1, col-1) == 0){
+              if(is_empty(b, row-1, col-1)){
                 bit_swap(b, row, col, b, row-1, col-1);
-              }else if (bit_read(b, row+1, col-1) == 0){
+              }else if (is_empty(b, row+1, col-1)){
                 bit_swap(b, row, col, b, row+1, col-1);
               }
             }
             
           }else if (quadrant == D_SOUTH){
             // check to see if this should pass the particle to the upper board   
-            if(b==1 && row==0 && col==0 && bit_read(0, 7, 7) == 0){
+            if(b==1 && row==0 && col==0 && is_empty(0, 7, 7)){
                if(currentMillis - previousMillis > interval) {
                   previousMillis = currentMillis;   
                   
                   bit_swap(b, row, col, 0, 7, 7);
                }
-            }else if(bit_read(b, row-1, col-1) == 0){
+            }else if(is_empty(b, row-1, col-1)){
               bit_swap(b, row, col, b, row-1, col-1);
-            }else if(bit_read(b, row-1, col) == 0){
+            }else if(is_empty(b, row-1, col)){
               bit_swap(b, row, col, b, row-1, col);
-            }else if(bit_read(b, row, col-1) == 0){
+            }else if(is_empty(b, row, col-1)){
               bit_swap(b, row, col, b, row, col-1);
             }
             
           }else if (quadrant == D_SW){
-            if(bit_read(b, row-1, col) == 0){
+            if(is_empty(b, row-1, col)){
               bit_swap(b, row, col, b, row-1, col);
             } // add random slide left or right, if available
             else if (random(1, random_scale) == random_score){
-              if(bit_read(b, row-1, col+1) == 0){
+              if(is_empty(b, row-1, col+1)){
                 bit_swap(b, row, col, b, row-1, col+1);
-              }else if (bit_read(b, row-1, col-1) == 0){
+              }else if (is_empty(b, row-1, col-1)){
                 bit_swap(b, row, col, b, row-1, col-1);
               }
             }
             
           }else if (quadrant == D_WEST){
-            if(bit_read(b, row-1, col+1) == 0){
+            if(is_empty(b, row-1, col+1)){
               bit_swap(b, row, col, b, row-1, col+1);
-            }else if(bit_read(b, row, col+1) == 0){
+            }else if(is_empty(b, row, col+1)){
               bit_swap(b, row, col, b, row, col+1);
-            }else if(bit_read(b, row-1, col) == 0){
+            }else if(is_empty(b, row-1, col)){
               bit_swap(b, row, col, b, row-1, col);
             }
             
           }else if (quadrant == D_NW){
-            if(bit_read(b, row, col+1) == 0){
+            if(is_empty(b, row, col+1)){
               bit_swap(b, row, col, b, row, col+1);
             } // add random slide left or right, if available
             else if (random(1,random_scale) == random_score){
-              if(bit_read(b, row+1, col+1) == 0){
+              if(is_empty(b, row+1, col+1)){
                 bit_swap(b, row, col, b, row+1, col+1);
-              }else if (bit_read(b, row-1, col+1) == 0){
+              }else if (is_empty(b, row-1, col+1)){
                 bit_swap(b, row, col, b, row-1, col+1);
               }
             }
@@ -247,13 +251,13 @@ void loop() {
   if(theta < 1) theta += 360;
 
   if(theta < 22.5 or theta > 337.5) quadrant = D_NORTH;
-  else if(theta < 67.5)             quadrant = D_NE;
-  else if(theta < 112.5)            quadrant = D_EAST;
-  else if(theta < 157.5)            quadrant = D_SE;
+  else if(theta < 67.5)             quadrant = D_NW;
+  else if(theta < 112.5)            quadrant = D_WEST;
+  else if(theta < 157.5)            quadrant = D_SW;
   else if(theta < 202.5)            quadrant = D_SOUTH;
-  else if(theta < 247.5)            quadrant = D_SW;
-  else if(theta < 292.5)            quadrant = D_WEST;
-  else                              quadrant = D_NW;
+  else if(theta < 247.5)            quadrant = D_SE;
+  else if(theta < 292.5)            quadrant = D_EAST;
+  else                              quadrant = D_NE;
 
   process_boards();
   
