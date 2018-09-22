@@ -250,6 +250,7 @@ void loop() {
   theta = round( atan2 (y_adc_value, x_adc_value) * 180/3.14159265 );
   if(theta < 1) theta += 360;
 
+  // these are reversed
   if(theta < 22.5 or theta > 337.5) quadrant = D_NORTH;
   else if(theta < 67.5)             quadrant = D_NW;
   else if(theta < 112.5)            quadrant = D_WEST;
